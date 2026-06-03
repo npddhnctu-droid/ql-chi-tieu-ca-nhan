@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { useEffect } from "react";
+import { initMonitoring } from "@/src/lib/monitoring";
 import { Geist, Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
@@ -27,6 +29,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => {
+    initMonitoring();
+  }, []);
   return (
     <html lang="en" suppressHydrationWarning className={cn("font-sans", inter.variable)}>
       <body className={`${geistSans.className} antialiased`}>

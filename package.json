@@ -5,7 +5,7 @@
     "build": "next build",
     "start": "next start",
     "test": "jest",
-    "lint": "echo \"Skipping lint for now\""
+    "lint": "eslint . --ext .js,.ts,.tsx",
     "release": "semantic-release"
   },
   "dependencies": {
