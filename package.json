@@ -4,7 +4,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "test": "jest",
+    "release": "semantic-release"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -30,6 +31,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.8",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -37,6 +40,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
     "postcss": "^8",
+    "semantic-release": "^25.0.3",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5"

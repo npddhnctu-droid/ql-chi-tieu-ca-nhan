@@ -81,3 +81,4 @@ Mọi đóng góp đều được chào đón!
 
 ## Giấy phép
 Dự án được cấp phép theo **MIT License** – xem file `LICENSE` để biết chi tiết.
+<!-- CI trigger -->
