@@ -8,31 +8,53 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, PiggyBank, AlertTriangle, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, PiggyBank, AlertTriangle, AlertCircle } from "lucide-react";
 import * as LucideIcons from "lucide-react";
+
+interface Category {
+  id: string;
+  name: string;
+  type: "income" | "expense";
+  icon?: string;
+  color?: string;
+}
+
+interface Budget {
+  id: string;
+  category_id: string;
+  amount: number | string;
+  month_year: string;
+  categories?: Category;
+}
+
+interface BudgetsClientProps {
+  categories: Category[];
+  initialTransactions: Array<{
+    id: string;
+    category_id: string;
+    amount: string | number;
+    type: "income" | "expense";
+    transaction_date: string;
+  }>;
+  initialBudgets: Budget[];
+}
 
 const CategoryIcon = ({ name, className, style }: { name: string; className?: string; style?: React.CSSProperties }) => {
   const pascalName = name.charAt(0).toUpperCase() + name.slice(1);
-  const IconComponent = (LucideIcons as any)[pascalName] || (LucideIcons as any)[name] || LucideIcons.HelpCircle;
+  const IconComponent = (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[pascalName] || 
+                        (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[name] || 
+                        LucideIcons.HelpCircle;
   return <IconComponent className={className} style={style} />;
 };
-
-interface BudgetsClientProps {
-  categories: any[];
-  initialTransactions: any[];
-  initialBudgets: any[];
-}
 
 export default function BudgetsClient({
   categories,
   initialTransactions,
   initialBudgets,
 }: BudgetsClientProps) {
-  const [budgets, setBudgets] = useState<any[]>(initialBudgets);
-  const [transactions] = useState<any[]>(initialTransactions);
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // "YYYY-MM"
-  
-  // State for tracking inline input changes
+  const [budgets, setBudgets] = useState<Budget[]>(initialBudgets);
+  const [transactions] = useState(initialTransactions);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
   const [inputValues, setInputValues] = useState<{ [categoryId: string]: string }>({});
   const [loadingCategory, setLoadingCategory] = useState<string | null>(null);
 
@@ -43,10 +65,8 @@ export default function BudgetsClient({
     }).format(value);
   };
 
-  // Only expense categories can have budgets
   const expenseCategories = categories.filter((c) => c.type === "expense");
 
-  // Get spent transactions for the selected month
   const selectedMonthExpenses = transactions.filter((t) => {
     return t.type === "expense" && t.transaction_date.startsWith(selectedMonth);
   });
@@ -72,7 +92,6 @@ export default function BudgetsClient({
         month_year: selectedMonth,
       });
 
-      // Update state
       const existingIdx = budgets.findIndex(
         (b) => b.category_id === categoryId && b.month_year === selectedMonth
       );
@@ -95,14 +114,14 @@ export default function BudgetsClient({
       }
 
       toast.success("Cập nhật ngân sách thành công!");
-    } catch (err: any) {
-      toast.error(`Lỗi: ${err.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra";
+      toast.error(`Lỗi: ${errorMessage}`);
     } finally {
       setLoadingCategory(null);
     }
   };
 
-  // Generate distinct month list for the last 6 months to choose from
   const monthOptions = [];
   const currentDate = new Date();
   for (let i = 0; i < 6; i++) {
@@ -114,7 +133,6 @@ export default function BudgetsClient({
 
   return (
     <div className="space-y-6">
-      {/* Month Selector */}
       <Card className="bg-card/50 backdrop-blur-md border-border/80">
         <CardContent className="p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -141,16 +159,13 @@ export default function BudgetsClient({
         </CardContent>
       </Card>
 
-      {/* Budgets Grid */}
       <div className="grid gap-6 md:grid-cols-2">
         {expenseCategories.map((category) => {
-          // Find if there is a budget set for this category and month
           const budget = budgets.find(
             (b) => b.category_id === category.id && b.month_year === selectedMonth
           );
           const limit = budget ? Number(budget.amount) : 0;
 
-          // Calculate spent for this category this month
           const spent = selectedMonthExpenses
             .filter((t) => t.category_id === category.id)
             .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -159,7 +174,6 @@ export default function BudgetsClient({
           const isWarning = percent >= 80 && percent < 100;
           const isDanger = percent >= 100;
 
-          // Initialize input value state if not set
           const currentInputVal = inputValues[category.id] !== undefined
             ? inputValues[category.id]
             : (limit > 0 ? limit.toString() : "");
@@ -196,7 +210,6 @@ export default function BudgetsClient({
                 </div>
               </CardHeader>
               <CardContent className="pt-4 space-y-4">
-                {/* Visual status */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Đã tiêu: <strong className="text-foreground font-semibold">{formatVND(spent)}</strong></span>
@@ -227,7 +240,6 @@ export default function BudgetsClient({
                   )}
                 </div>
 
-                {/* Edit Budget input */}
                 <div className="pt-2 border-t border-border/40 flex items-end gap-3">
                   <div className="flex-1 space-y-1">
                     <Label htmlFor={`budget-${category.id}`} className="text-xs font-semibold">Cập nhật hạn mức ngân sách</Label>
@@ -261,7 +273,6 @@ export default function BudgetsClient({
                   </Button>
                 </div>
 
-                {/* Warning message card */}
                 {limit > 0 && isDanger && (
                   <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-2.5 rounded-lg flex items-start gap-2 text-xs">
                     <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />

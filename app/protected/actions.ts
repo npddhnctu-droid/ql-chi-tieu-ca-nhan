@@ -5,6 +5,14 @@
 import { createClient } from "@/lib/supabase/server";
 
 
+interface Category {
+  id: string;
+  name: string;
+  type: "income" | "expense";
+  icon?: string;
+  color?: string;
+}
+
 export async function getCategories() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -121,7 +129,7 @@ export async function getBudgets() {
   return data || [];
 }
 
-  export async function upsertBudget(data: {
+export async function upsertBudget(data: {
   category_id: string;
   amount: number;
   month_year: string;
@@ -172,7 +180,6 @@ export async function getBudgets() {
   return res.data;
 }
 
-
 export async function categorizeWithAI(text: string) {
   try {
     const supabase = await createClient();
@@ -181,7 +188,7 @@ export async function categorizeWithAI(text: string) {
 
     const categories = await getCategories();
     const categoriesList = categories
-      .map((c) => `- ${c.name} (${c.type === "expense" ? "Chi tiêu" : "Thu nhập"})`)
+      .map((c) => `- ${c.name} (${c.type === "expense" ? "Chi tiêu" : "Thu nhập"})`) 
       .join("\n");
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -209,8 +216,7 @@ ${categoriesList}
   "type": "expense" | "income" (loại giao dịch: 'expense' cho chi tiêu, 'income' cho thu nhập),
   "category_name": string (phải chọn đúng tên một trong các danh mục có sẵn ở trên khớp nhất),
   "note": string (tóm tắt ngắn gọn nội dung giao dịch, ví dụ "Mua cơm tấm")
-}
-`;
+}`;
 
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
@@ -236,7 +242,7 @@ ${categoriesList}
   }
 }
 
-function fallbackLocalParser(text: string, categories: any[]) {
+function fallbackLocalParser(text: string, categories: Category[]) {
   const amountMatch = text.match(/(\d+(?:\.\d+)?)\s*(k|K|tr|tr triệu|m|triệu)?/);
   let amount = 0;
   if (amountMatch) {
@@ -400,4 +406,3 @@ export async function deleteCategory(id: string) {
   revalidatePath("/protected");
   return true;
 }
-

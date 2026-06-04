@@ -57,7 +57,7 @@ export default async function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link
               href={user ? "/protected" : "/auth/login"}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group cursor-pointer"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all flex items-center gap-2 group"
             >
               <span>{user ? "Vào bảng điều khiển" : "Bắt đầu miễn phí"}</span>
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -65,7 +65,7 @@ export default async function Home() {
             {!user && (
               <Link
                 href="/auth/sign-up"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-accent text-accent-foreground font-semibold text-sm border border-border/85 hover:bg-accent/80 transition-all flex items-center justify-center cursor-pointer"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-accent text-accent-foreground font-semibold text-sm border border-border/85 hover:bg-accent/80 transition-all flex items-center justify-center gap-2"
               >
                 Đăng ký tài khoản
               </Link>
@@ -91,7 +91,7 @@ export default async function Home() {
             </div>
             <h3 className="text-lg font-bold">Nhập liệu nhanh bằng AI</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Không còn tốn thời gian gõ từng trường dữ liệu. Chỉ cần nhập: "Ăn trưa 45k" hoặc "Nhận lương 15tr", AI sẽ tự động phân tích loại giao dịch, số tiền và gắn danh mục chuẩn xác.
+              Không còn tốn thời gian gõ từng trường dữ liệu. Chỉ cần nhập: &quot;Ăn trưa 45k&quot; hoặc &quot;Nhận lương 15tr&quot;, AI sẽ tự động phân tích và lưu giao dịch cho bạn.
             </p>
           </div>
 
@@ -102,7 +102,7 @@ export default async function Home() {
             </div>
             <h3 className="text-lg font-bold">Quản lý Ngân sách Hợp lý</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Thiết lập hạn mức chi tiêu hàng tháng cho từng danh mục riêng biệt. Hệ thống tự động cảnh báo bằng trực quan khi bạn tiêu dùng vượt quá 80% hoặc 100% hạn mức.
+              Thiết lập hạn mức chi tiêu hàng tháng cho từng danh mục riêng biệt. Hệ thống tự động cảnh báo bằng trực quan khi bạn tiêu dùng vượt quá 80% hạn mức.
             </p>
           </div>
 
@@ -113,7 +113,7 @@ export default async function Home() {
             </div>
             <h3 className="text-lg font-bold">Báo cáo Dòng tiền Trực quan</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Xem báo cáo cơ cấu chi tiêu bằng biểu đồ tròn sinh động và biểu đồ cột so sánh chi tiết giữa thu nhập & chi tiêu qua các tháng. Nắm rõ tiền của bạn đang đi đâu.
+              Xem báo cáo cơ cấu chi tiêu bằng biểu đồ tròn sinh động và biểu đồ cột so sánh chi tiết giữa thu nhập & chi tiêu qua các tháng. Nắm rõ tiền chảy đi đâu.
             </p>
           </div>
         </div>

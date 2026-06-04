@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Plus, Trash2, FolderOpen, Heart, HelpCircle, Utensils, Car, ShoppingBag, Home, Film, GraduationCap, Plane, Award, Briefcase, Gift, Wallet } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 
-// List of icons to choose from
 const ICON_OPTIONS = [
   { name: "utensils", label: "Ăn uống", icon: Utensils },
   { name: "car", label: "Di chuyển", icon: Car },
@@ -28,37 +27,34 @@ const ICON_OPTIONS = [
   { name: "help-circle", label: "Khác", icon: HelpCircle },
 ];
 
-// List of preset colors
 const COLOR_OPTIONS = [
-  "#ef4444", // red
-  "#f43f5e", // rose
-  "#f97316", // orange
-  "#f59e0b", // amber
-  "#eab308", // yellow
-  "#22c55e", // green
-  "#10b981", // emerald
-  "#06b6d4", // cyan
-  "#3b82f6", // blue
-  "#6366f1", // indigo
-  "#a855f7", // purple
-  "#d946ef", // fuchsia
-  "#64748b", // slate
+  "#ef4444", "#f43f5e", "#f97316", "#f59e0b", "#eab308", "#22c55e", "#10b981",
+  "#06b6d4", "#3b82f6", "#6366f1", "#a855f7", "#d946ef", "#64748b",
 ];
+
+interface Category {
+  id: string;
+  name: string;
+  type: "expense" | "income";
+  icon?: string;
+  color?: string;
+  user_id?: string;
+}
 
 const CategoryIcon = ({ name, className, style }: { name: string; className?: string; style?: React.CSSProperties }) => {
   const pascalName = name.charAt(0).toUpperCase() + name.slice(1);
-  const IconComponent = (LucideIcons as any)[pascalName] || (LucideIcons as any)[name] || LucideIcons.HelpCircle;
+  const IconComponent = (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[pascalName] || 
+                        (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[name] || 
+                        LucideIcons.HelpCircle;
   return <IconComponent className={className} style={style} />;
 };
 
 interface CategoriesClientProps {
-  initialCategories: any[];
+  initialCategories: Category[];
 }
 
 export default function CategoriesClient({ initialCategories }: CategoriesClientProps) {
-  const [categories, setCategories] = useState<any[]>(initialCategories);
-  
-  // Form State
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [name, setName] = useState("");
   const [type, setType] = useState<"expense" | "income">("expense");
   const [selectedIcon, setSelectedIcon] = useState("help-circle");
@@ -87,8 +83,9 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
       setName("");
       setSelectedIcon("help-circle");
       setSelectedColor("#ef4444");
-    } catch (err: any) {
-      toast.error(`Lỗi: ${err.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra";
+      toast.error(`Lỗi: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -100,8 +97,9 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
       await deleteCategory(id);
       setCategories((prev) => prev.filter((c) => c.id !== id));
       toast.success("Xóa danh mục thành công!");
-    } catch (err: any) {
-      toast.error(err.message || "Không thể xóa danh mục này.");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Không thể xóa danh mục này.";
+      toast.error(errorMessage);
     } finally {
       setDeletingId(null);
     }
@@ -112,7 +110,6 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
 
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      {/* Create Form Card */}
       <Card className="bg-card/50 backdrop-blur-md border-border/80 h-fit">
         <CardHeader>
           <CardTitle className="text-xl font-bold">Thêm Danh Mục Mới</CardTitle>
@@ -120,7 +117,6 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreateCategory} className="space-y-4">
-            {/* Type */}
             <div className="grid grid-cols-2 gap-2">
               <Button
                 type="button"
@@ -140,7 +136,6 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
               </Button>
             </div>
 
-            {/* Name */}
             <div className="space-y-1">
               <Label htmlFor="category-name">Tên danh mục</Label>
               <Input
@@ -152,7 +147,6 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
               />
             </div>
 
-            {/* Color options */}
             <div className="space-y-2">
               <Label>Màu sắc đại diện</Label>
               <div className="grid grid-cols-7 gap-2">
@@ -172,7 +166,6 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
               </div>
             </div>
 
-            {/* Icon options */}
             <div className="space-y-2">
               <Label>Biểu tượng</Label>
               <div className="grid grid-cols-5 gap-2 max-h-[140px] overflow-y-auto p-1 border border-border/80 rounded-lg bg-background/50">
@@ -196,7 +189,6 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
               </div>
             </div>
 
-            {/* Submit */}
             <Button type="submit" disabled={isSubmitting} className="w-full cursor-pointer">
               {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
               Tạo Danh Mục
@@ -205,9 +197,7 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
         </CardContent>
       </Card>
 
-      {/* Categories List Cards */}
       <div className="md:col-span-2 space-y-6">
-        {/* Expenses List */}
         <Card className="bg-card/50 backdrop-blur-md border-border/80">
           <CardHeader className="pb-3 border-b border-border/40">
             <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -264,7 +254,6 @@ export default function CategoriesClient({ initialCategories }: CategoriesClient
           </CardContent>
         </Card>
 
-        {/* Incomes List */}
         <Card className="bg-card/50 backdrop-blur-md border-border/80">
           <CardHeader className="pb-3 border-b border-border/40">
             <CardTitle className="text-lg font-bold flex items-center gap-2">

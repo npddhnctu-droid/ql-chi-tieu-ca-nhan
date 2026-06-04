@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 
-export default function BudgetForm({ categories, onSuccess }: { categories: any[]; onSuccess: () => void }) {
+interface Category {
+  id: string;
+  name: string;
+  type: 'income' | 'expense';
+}
+
+interface BudgetFormProps {
+  categories: Category[];
+  onSuccess: () => void;
+}
+
+export default function BudgetForm({ categories, onSuccess }: BudgetFormProps) {
   const [categoryId, setCategoryId] = useState('');
   const [amount, setAmount] = useState('');
   const [monthYear, setMonthYear] = useState('');
@@ -33,6 +44,7 @@ export default function BudgetForm({ categories, onSuccess }: { categories: any[
       setMonthYear('');
       onSuccess();
     } catch (err) {
+      console.error(err);
       setError('Gửi dữ liệu thất bại');
     } finally {
       setLoading(false);
@@ -53,7 +65,7 @@ export default function BudgetForm({ categories, onSuccess }: { categories: any[
             required
           >
             <option value="">-- Chọn danh mục --</option>
-            {categories.map((c: any) => (
+            {categories.map((c: Category) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
