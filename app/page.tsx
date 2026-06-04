@@ -51,7 +51,7 @@ export default async function Home() {
           </h1>
 
           <p className="max-w-2xl mx-auto text-muted-foreground text-base md:text-lg leading-relaxed">
-            Theo dõi chi tiêu, lập kế hoạch ngân sách và phân tích dòng tiền nhanh chóng bằng ngôn ngữ tự nhiên với Trợ lý AI. Đơn giản, trực quan và bảo mật.
+            Theo dõi chi tiêu, lập kế hoạch ngân sách và phân tích dòng tiền nhanh chóng bằng ngôn ngữ tự nhiên với Trợ lý AI. Đơn giản, trực quan và bảo mật tuyệt đối.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -65,7 +65,7 @@ export default async function Home() {
             {!user && (
               <Link
                 href="/auth/sign-up"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-accent text-accent-foreground font-semibold text-sm border border-border/85 hover:bg-accent/80 transition-all flex items-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-accent text-accent-foreground font-semibold text-sm border border-border/85 hover:bg-accent/80 transition-all flex items-center justify-center gap-2"
               >
                 Đăng ký tài khoản
               </Link>
@@ -91,7 +91,7 @@ export default async function Home() {
             </div>
             <h3 className="text-lg font-bold">Nhập liệu nhanh bằng AI</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Không còn tốn thời gian gõ từng trường dữ liệu. Chỉ cần nhập: &quot;Ăn trưa 45k&quot; hoặc &quot;Nhận lương 15tr&quot;, AI sẽ tự động phân tích loại giao dịch, số tiền và danh mục phù hợp.
+              Không còn tốn thời gian gõ từng trường dữ liệu. Chỉ cần nhập: &quot;Ăn trưa 45k&quot; hoặc &quot;Nhận lương 15tr&quot;, AI sẽ tự động phân tích và lưu giao dịch cho bạn.
             </p>
           </div>
 
@@ -113,7 +113,7 @@ export default async function Home() {
             </div>
             <h3 className="text-lg font-bold">Báo cáo Dòng tiền Trực quan</h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Xem báo cáo cơ cấu chi tiêu bằng biểu đồ tròn sinh động và biểu đồ cột so sánh chi tiết giữa thu nhập & chi tiêu qua các tháng. Nắm rõ tiền chảy vào, chảy ra rõ ràng.
+              Xem báo cáo cơ cấu chi tiêu bằng biểu đồ tròn sinh động và biểu đồ cột so sánh chi tiết giữa thu nhập & chi tiêu qua các tháng. Nắm rõ tiền chảy đi đâu.
             </p>
           </div>
         </div>
