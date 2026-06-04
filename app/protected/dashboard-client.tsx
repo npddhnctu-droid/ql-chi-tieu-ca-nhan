@@ -57,33 +57,69 @@ import {
   Cell,
 } from "recharts";
 
+interface Category {
+  id: string;
+  name: string;
+  type: "income" | "expense";
+  icon?: string;
+  color?: string;
+}
+
+interface Transaction {
+  id: string;
+  category_id: string;
+  amount: number | string;
+  type: "income" | "expense";
+  transaction_date: string;
+  note?: string;
+  categories?: Category;
+}
+
+interface Budget {
+  id: string;
+  category_id: string;
+  amount: number;
+  month_year: string;
+  categories?: Category;
+}
+
+interface DashboardClientProps {
+  categories: Category[];
+  initialTransactions: Transaction[];
+  initialBudgets: Budget[];
+}
+
+interface BudgetWarning {
+  categoryName: string;
+  icon: string;
+  color: string;
+  limit: number;
+  spent: number;
+  percent: number;
+}
+
 // Helper to render icon
 const CategoryIcon = ({ name, className, style }: { name: string; className?: string; style?: React.CSSProperties }) => {
   const pascalName = name.charAt(0).toUpperCase() + name.slice(1);
-  const IconComponent = (LucideIcons as any)[pascalName] || (LucideIcons as any)[name] || LucideIcons.HelpCircle;
+  const IconComponent = (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[pascalName] || 
+                        (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[name] || 
+                        LucideIcons.HelpCircle;
   return <IconComponent className={className} style={style} />;
 };
-
-interface DashboardClientProps {
-  categories: any[];
-  initialTransactions: any[];
-  initialBudgets: any[];
-}
 
 export default function DashboardClient({
   categories,
   initialTransactions,
   initialBudgets,
 }: DashboardClientProps) {
-  const [transactions, setTransactions] = useState<any[]>(initialTransactions);
-  const [budgets, setBudgets] = useState<any[]>(initialBudgets);
+  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   
   // State for AI input
   const [aiText, setAiText] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
 
   // Edit State
-  const [editingTx, setEditingTx] = useState<any | null>(null);
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editAmount, setEditAmount] = useState("");
   const [editType, setEditType] = useState<"expense" | "income">("expense");
@@ -93,11 +129,11 @@ export default function DashboardClient({
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
   // Delete State
-  const [deletingTx, setDeletingTx] = useState<any | null>(null);
+  const [deletingTx, setDeletingTx] = useState<Transaction | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const openEditDialog = (tx: any) => {
+  const openEditDialog = (tx: Transaction) => {
     setEditingTx(tx);
     setEditAmount(tx.amount.toString());
     setEditType(tx.type);
@@ -107,7 +143,7 @@ export default function DashboardClient({
     setIsEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (tx: any) => {
+  const openDeleteDialog = (tx: Transaction) => {
     setDeletingTx(tx);
     setIsDeleteDialogOpen(true);
   };
@@ -143,8 +179,9 @@ export default function DashboardClient({
       );
       toast.success("Cập nhật giao dịch thành công!");
       setIsEditDialogOpen(false);
-    } catch (err: any) {
-      toast.error(`Lỗi: ${err.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra";
+      toast.error(`Lỗi: ${errorMessage}`);
     } finally {
       setIsEditSubmitting(false);
     }
@@ -158,8 +195,9 @@ export default function DashboardClient({
       setTransactions((prev) => prev.filter((t) => t.id !== deletingTx.id));
       toast.success("Xóa giao dịch thành công!");
       setIsDeleteDialogOpen(false);
-    } catch (err: any) {
-      toast.error(`Lỗi: ${err.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra";
+      toast.error(`Lỗi: ${errorMessage}`);
     } finally {
       setIsDeleting(false);
     }
@@ -194,8 +232,7 @@ export default function DashboardClient({
   const balance = totalIncome - totalExpense;
 
   // Process data for Monthly Bar Chart
-  // Group by month-year
-  const monthlyDataMap = transactions.reduce((acc: any, t: any) => {
+  const monthlyDataMap = transactions.reduce<Record<string, { name: string; thu: number; chi: number }>>((acc, t) => {
     const d = new Date(t.transaction_date);
     const monthKey = d.toLocaleString("vi-VN", { month: "short", year: "numeric" });
     if (!acc[monthKey]) {
@@ -212,12 +249,12 @@ export default function DashboardClient({
   const barChartData = Object.values(monthlyDataMap).reverse();
 
   // Process data for Pie Chart (Current Month Expenses)
-  const currentMonthYear = new Date().toISOString().slice(0, 7); // YYYY-MM
-  const currentMonthExpenses = transactions.filter((t: any) => {
+  const currentMonthYear = new Date().toISOString().slice(0, 7);
+  const currentMonthExpenses = transactions.filter((t) => {
     return t.type === "expense" && t.transaction_date.startsWith(currentMonthYear);
   });
 
-  const pieDataMap = currentMonthExpenses.reduce((acc: any, t: any) => {
+  const pieDataMap = currentMonthExpenses.reduce<Record<string, { name: string; value: number; color: string }>>((acc, t) => {
     const catName = t.categories?.name || "Khác";
     const color = t.categories?.color || "#94a3b8";
     if (!acc[catName]) {
@@ -230,13 +267,13 @@ export default function DashboardClient({
   const pieChartData = Object.values(pieDataMap);
 
   // Budget warnings
-  const budgetsForCurrentMonth = budgets.filter((b: any) => b.month_year === currentMonthYear);
-  const budgetWarnings = budgetsForCurrentMonth.map((budget: any) => {
+  const budgetsForCurrentMonth = initialBudgets.filter((b) => b.month_year === currentMonthYear);
+  const budgetWarnings: BudgetWarning[] = budgetsForCurrentMonth.map((budget) => {
     const catId = budget.category_id;
     const limit = Number(budget.amount);
     const spent = currentMonthExpenses
-      .filter((t: any) => t.category_id === catId)
-      .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
+      .filter((t) => t.category_id === catId)
+      .reduce((sum, t) => sum + Number(t.amount), 0);
       
     const percent = limit > 0 ? (spent / limit) * 100 : 0;
     
@@ -248,7 +285,7 @@ export default function DashboardClient({
       spent,
       percent,
     };
-  }).filter((w: any) => w.percent >= 80);
+  }).filter((w) => w.percent >= 80);
 
   // Trigger manual transaction save
   const handleSaveTransaction = async (e: React.FormEvent) => {
@@ -272,7 +309,6 @@ export default function DashboardClient({
         note,
       });
 
-      // Fetch fresh transactions list (optimistic update mock or update state manually)
       setTransactions([
         {
           ...newTx,
@@ -284,8 +320,9 @@ export default function DashboardClient({
       toast.success("Thêm giao dịch thành công!");
       resetForm();
       setIsDialogOpen(false);
-    } catch (err: any) {
-      toast.error(`Lỗi: ${err.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra";
+      toast.error(`Lỗi: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -301,17 +338,17 @@ export default function DashboardClient({
     setIsAiLoading(true);
     try {
       const parsed = await categorizeWithAI(aiText);
-      // Auto fill form
       setAmount(parsed.amount.toString());
       setType(parsed.type);
       setCategoryId(parsed.category_id);
       setNote(parsed.note);
-      setDate(new Date().toISOString().slice(0, 10)); // Default to today
+      setDate(new Date().toISOString().slice(0, 10));
       
-      setIsDialogOpen(true); // Open Dialog to let user review
+      setIsDialogOpen(true);
       toast.success("Phân tích hoàn tất! Hãy kiểm tra và lưu lại.");
-    } catch (err: any) {
-      toast.error("Không thể phân tích bằng AI. Đang chuyển sang nhập thủ công.");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Không thể phân tích bằng AI";
+      toast.error(`${errorMessage}. Đang chuyển sang nhập thủ công.`);
       setIsDialogOpen(true);
     } finally {
       setIsAiLoading(false);
@@ -609,7 +646,7 @@ export default function DashboardClient({
                         outerRadius={80}
                         paddingAngle={2}
                       >
-                        {pieChartData.map((entry: any, index: number) => (
+                        {pieChartData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
@@ -623,7 +660,7 @@ export default function DashboardClient({
                 </div>
                 {/* Legend list */}
                 <div className="grid grid-cols-2 gap-2 text-xs overflow-y-auto max-h-24">
-                  {pieChartData.map((entry: any, index: number) => (
+                  {pieChartData.map((entry, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
                       <span className="truncate text-muted-foreground">{entry.name}</span>
