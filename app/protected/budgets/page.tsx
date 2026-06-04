@@ -5,12 +5,13 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getBudgets, getCategories, getTransactions } from "@/app/protected/actions";
 import BudgetForm from "@/app/protected/budgets/BudgetForm";
+import type { Budget, Category, Transaction } from "@/app/types";
 
 export default function BudgetsPage() {
   const router = useRouter();
-  const [budgets, setBudgets] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
@@ -35,7 +36,7 @@ export default function BudgetsPage() {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // Alert when any budget is exceeded
@@ -105,17 +106,17 @@ export default function BudgetsPage() {
               </tr>
             </thead>
             <tbody>
-              {categories.map((cat: any) => {
-                const budget = budgets.find((b: any) => b.category_id === cat.id);
+              {categories.map((cat: Category) => {
+                const budget = budgets.find((b: Budget) => b.category_id === cat.id);
                 const monthYear = budget?.month_year?.slice(0, 7) || "—";
                 const used = transactions
                   .filter(
-                    (t: any) =>
+                    (t: Transaction) =>
                       t.category_id === cat.id &&
                       t.type === "expense" &&
                       t.transaction_date?.startsWith(monthYear)
                   )
-                  .reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+                  .reduce((sum: number, t: Transaction) => sum + (t.amount || 0), 0);
                 const remaining = (budget?.amount ?? 0) - used;
                 const isOver = used > (budget?.amount ?? 0);
                 return (

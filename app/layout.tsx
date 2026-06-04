@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { useEffect } from "react";
-import { initMonitoring } from "@/src/lib/monitoring";
 import { Geist, Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import MonitoringInit from "@/components/MonitoringInit";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -24,23 +23,26 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+if (typeof window !== "undefined" && !(window as any).chrome) {
+  (window as any).chrome = {
+    runtime: {
+      sendMessage: () => {},
+      onMessage: { addListener: () => {} },
+      lastError: null,
+    },
+  };
+}
+
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  useEffect(() => {
-    initMonitoring();
-  }, []);
+}) {
   return (
     <html lang="en" suppressHydrationWarning className={cn("font-sans", inter.variable)}>
       <body className={`${geistSans.className} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <MonitoringInit />
           {children}
         </ThemeProvider>
       </body>

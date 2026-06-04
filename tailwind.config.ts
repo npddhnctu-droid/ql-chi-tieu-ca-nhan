@@ -1,4 +1,5 @@
-import type { Config } from "tailwindcss";
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 
 export default {
   darkMode: ["class"],

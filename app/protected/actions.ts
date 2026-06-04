@@ -1,7 +1,9 @@
 "use server";
 
+
+
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+
 
 export async function getCategories() {
   const supabase = await createClient();
@@ -50,8 +52,8 @@ export async function createTransaction(data: {
     throw new Error(error.message);
   }
 
-  revalidatePath("/protected");
-  revalidatePath("/protected/transactions");
+
+
   return transaction;
 }
 
@@ -165,8 +167,8 @@ export async function getBudgets() {
     throw new Error(res.error.message);
   }
 
-  revalidatePath("/protected");
-  revalidatePath("/protected/budgets");
+
+
   return res.data;
 }
 
@@ -262,7 +264,7 @@ function fallbackLocalParser(text: string, categories: any[]) {
     matchedCategory = categories.find(c => c.name.toLowerCase().includes("mua sắm")) || matchedCategory;
   }
 
-  let note = text.charAt(0).toUpperCase() + text.slice(1);
+  const note = text.charAt(0).toUpperCase() + text.slice(1);
 
   return {
     amount,
@@ -288,9 +290,9 @@ export async function deleteTransaction(id: string) {
     throw new Error(error.message);
   }
 
-  revalidatePath("/protected");
-  revalidatePath("/protected/transactions");
-  revalidatePath("/protected/budgets");
+
+
+
   return true;
 }
 
@@ -327,9 +329,9 @@ export async function updateTransaction(
     throw new Error(error.message);
   }
 
-  revalidatePath("/protected");
-  revalidatePath("/protected/transactions");
-  revalidatePath("/protected/budgets");
+
+
+
   return transaction;
 }
 

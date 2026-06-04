@@ -3,7 +3,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Sparkles, TrendingUp, PieChart, PiggyBank, Wallet, ArrowRight, ShieldCheck } from "lucide-react";
+import { Sparkles, PieChart, PiggyBank, Wallet, ArrowRight, ShieldCheck } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
