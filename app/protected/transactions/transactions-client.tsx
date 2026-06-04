@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Calendar, Filter, ArrowUpDown, Edit2, Trash2, Loader2, DollarSign } from "lucide-react";
+import { Search, Calendar, Edit2, Trash2, Loader2, DollarSign } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,29 +34,48 @@ import {
 import { deleteTransaction, updateTransaction } from "../actions";
 import { toast } from "sonner";
 
-const CategoryIcon = ({ name, className, style }: { name: string; className?: string; style?: React.CSSProperties }) => {
-  const pascalName = name.charAt(0).toUpperCase() + name.slice(1);
-  const IconComponent = (LucideIcons as any)[pascalName] || (LucideIcons as any)[name] || LucideIcons.HelpCircle;
-  return <IconComponent className={className} style={style} />;
-};
+interface Category {
+  id: string;
+  name: string;
+  type: "income" | "expense";
+  icon?: string;
+  color?: string;
+}
+
+interface Transaction {
+  id: string;
+  category_id: string;
+  amount: string | number;
+  type: "income" | "expense";
+  transaction_date: string;
+  note?: string;
+  categories?: Category;
+}
 
 interface TransactionsClientProps {
-  categories: any[];
-  initialTransactions: any[];
+  categories: Category[];
+  initialTransactions: Transaction[];
 }
+
+const CategoryIcon = ({ name, className, style }: { name: string; className?: string; style?: React.CSSProperties }) => {
+  const pascalName = name.charAt(0).toUpperCase() + name.slice(1);
+  const IconComponent = (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[pascalName] || 
+                        (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[name] || 
+                        LucideIcons.HelpCircle;
+  return <IconComponent className={className} style={style} />;
+};
 
 export default function TransactionsClient({
   categories,
   initialTransactions,
 }: TransactionsClientProps) {
-  const [transactions, setTransactions] = useState<any[]>(initialTransactions);
+  const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterMonth, setFilterMonth] = useState<string>("");
 
-  // Edit State
-  const [editingTx, setEditingTx] = useState<any | null>(null);
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editAmount, setEditAmount] = useState("");
   const [editType, setEditType] = useState<"expense" | "income">("expense");
@@ -65,12 +84,11 @@ export default function TransactionsClient({
   const [editNote, setEditNote] = useState("");
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
-  // Delete State
-  const [deletingTx, setDeletingTx] = useState<any | null>(null);
+  const [deletingTx, setDeletingTx] = useState<Transaction | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const openEditDialog = (tx: any) => {
+  const openEditDialog = (tx: Transaction) => {
     setEditingTx(tx);
     setEditAmount(tx.amount.toString());
     setEditType(tx.type);
@@ -80,7 +98,7 @@ export default function TransactionsClient({
     setIsEditDialogOpen(true);
   };
 
-  const openDeleteDialog = (tx: any) => {
+  const openDeleteDialog = (tx: Transaction) => {
     setDeletingTx(tx);
     setIsDeleteDialogOpen(true);
   };
@@ -116,8 +134,9 @@ export default function TransactionsClient({
       );
       toast.success("Cập nhật giao dịch thành công!");
       setIsEditDialogOpen(false);
-    } catch (err: any) {
-      toast.error(`Lỗi: ${err.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra";
+      toast.error(`Lỗi: ${errorMessage}`);
     } finally {
       setIsEditSubmitting(false);
     }
@@ -131,21 +150,20 @@ export default function TransactionsClient({
       setTransactions((prev) => prev.filter((t) => t.id !== deletingTx.id));
       toast.success("Xóa giao dịch thành công!");
       setIsDeleteDialogOpen(false);
-    } catch (err: any) {
-      toast.error(`Lỗi: ${err.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Có lỗi xảy ra";
+      toast.error(`Lỗi: ${errorMessage}`);
     } finally {
       setIsDeleting(false);
     }
   };
 
-  // Get distinct months from transactions for dropdown filter
   const months = Array.from(
     new Set(
-      transactions.map((t) => t.transaction_date.slice(0, 7)) // "YYYY-MM"
+      transactions.map((t) => t.transaction_date.slice(0, 7))
     )
   ).sort().reverse();
 
-  // Filter transactions
   const filteredTransactions = transactions.filter((t) => {
     const matchesSearch =
       !searchTerm ||
@@ -153,12 +171,8 @@ export default function TransactionsClient({
       t.categories?.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesType = !filterType || filterType === "all" || t.type === filterType;
-
-    const matchesCategory =
-      !filterCategory || filterCategory === "all" || t.category_id === filterCategory;
-
-    const matchesMonth =
-      !filterMonth || filterMonth === "all" || t.transaction_date.startsWith(filterMonth);
+    const matchesCategory = !filterCategory || filterCategory === "all" || t.category_id === filterCategory;
+    const matchesMonth = !filterMonth || filterMonth === "all" || t.transaction_date.startsWith(filterMonth);
 
     return matchesSearch && matchesType && matchesCategory && matchesMonth;
   });
@@ -172,11 +186,9 @@ export default function TransactionsClient({
 
   return (
     <div className="space-y-6">
-      {/* Search & Filters Card */}
       <Card className="bg-card/50 backdrop-blur-md border-border/80">
         <CardContent className="p-4 md:p-6">
           <div className="grid gap-4 md:grid-cols-4">
-            {/* Search input */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="search" className="text-xs font-semibold">Tìm kiếm</Label>
               <div className="relative">
@@ -191,7 +203,6 @@ export default function TransactionsClient({
               </div>
             </div>
 
-            {/* Type filter */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="type-filter" className="text-xs font-semibold">Loại giao dịch</Label>
               <Select value={filterType} onValueChange={(val) => setFilterType(val || "")}>
@@ -206,7 +217,6 @@ export default function TransactionsClient({
               </Select>
             </div>
 
-            {/* Category filter */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="category-filter" className="text-xs font-semibold">Danh mục</Label>
               <Select value={filterCategory} onValueChange={(val) => setFilterCategory(val || "")}>
@@ -224,7 +234,6 @@ export default function TransactionsClient({
               </Select>
             </div>
 
-            {/* Month filter */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="month-filter" className="text-xs font-semibold">Thời gian (Tháng)</Label>
               <Select value={filterMonth} onValueChange={(val) => setFilterMonth(val || "")}>
@@ -248,7 +257,6 @@ export default function TransactionsClient({
         </CardContent>
       </Card>
 
-      {/* Transactions Table Card */}
       <Card className="bg-card/50 backdrop-blur-md border-border/80 overflow-hidden">
         <CardContent className="p-0">
           {filteredTransactions.length > 0 ? (
@@ -292,20 +300,12 @@ export default function TransactionsClient({
                       <TableCell className="text-center">
                         <Badge
                           variant="secondary"
-                          className={
-                            t.type === "income"
-                              ? "bg-green-500/10 text-green-500 border border-green-500/20"
-                              : "bg-red-500/10 text-red-500 border border-red-500/20"
-                          }
+                          className={t.type === "income" ? "bg-green-500/10 text-green-500 border border-green-500/20" : "bg-red-500/10 text-red-500 border border-red-500/20"}
                         >
                           {t.type === "income" ? "Thu nhập" : "Chi tiêu"}
                         </Badge>
                       </TableCell>
-                      <TableCell
-                        className={`text-right font-bold text-sm ${
-                          t.type === "income" ? "text-green-500" : ""
-                        }`}
-                      >
+                      <TableCell className={`text-right font-bold text-sm ${t.type === "income" ? "text-green-500" : ""}`}>
                         {t.type === "income" ? "+" : "-"}
                         {formatVND(Number(t.amount))}
                       </TableCell>
@@ -342,7 +342,6 @@ export default function TransactionsClient({
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <form onSubmit={handleUpdate}>
@@ -354,7 +353,6 @@ export default function TransactionsClient({
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
-              {/* Type Selection */}
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   type="button"
@@ -380,7 +378,6 @@ export default function TransactionsClient({
                 </Button>
               </div>
 
-              {/* Amount */}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-amount">Số tiền (đ)</Label>
                 <div className="relative">
@@ -396,7 +393,6 @@ export default function TransactionsClient({
                 </div>
               </div>
 
-              {/* Category selection */}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-category">Danh mục</Label>
                 <Select value={editCategoryId} onValueChange={(val) => setEditCategoryId(val || "")} required>
@@ -409,10 +405,7 @@ export default function TransactionsClient({
                       .map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           <div className="flex items-center gap-2">
-                            <span
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: c.color }}
-                            />
+                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: c.color }} />
                             <span>{c.name}</span>
                           </div>
                         </SelectItem>
@@ -421,7 +414,6 @@ export default function TransactionsClient({
                 </Select>
               </div>
 
-              {/* Date */}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-date">Ngày giao dịch</Label>
                 <div className="relative">
@@ -437,7 +429,6 @@ export default function TransactionsClient({
                 </div>
               </div>
 
-              {/* Note */}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="edit-note">Ghi chú</Label>
                 <Input
@@ -451,9 +442,7 @@ export default function TransactionsClient({
 
             <DialogFooter>
               <Button type="submit" disabled={isEditSubmitting} className="w-full">
-                {isEditSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
+                {isEditSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                 Lưu Thay Đổi
               </Button>
             </DialogFooter>
@@ -461,7 +450,6 @@ export default function TransactionsClient({
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
