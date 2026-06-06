@@ -21,8 +21,8 @@ export default async function Page() {
 
       <DashboardClient
         categories={categories}
-        initialTransactions={transactions}
-        initialBudgets={budgets}
+        initialTransactions={transactions as any}
+        initialBudgets={budgets as any}
       />
     </div>
   );
