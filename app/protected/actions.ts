@@ -95,7 +95,7 @@ export async function getTransactions() {
     console.error("Error getTransactions:", error);
     throw new Error(error.message);
   }
-  return data || [];
+  return (data as any) || [];
 }
 
 export async function getBudgets() {
@@ -125,7 +125,7 @@ export async function getBudgets() {
     console.error("Error getBudgets:", error);
     throw new Error(error.message);
   }
-  return data || [];
+  return (data as any) || [];
 }
 
 export async function upsertBudget(data: {
