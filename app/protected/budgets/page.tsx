@@ -57,7 +57,7 @@ export default function BudgetsPage() {
             .reduce((sum, t) => sum + (t.amount || 0), 0);
           return used > (budget.amount || 0) ? { cat, used, budget } : null;
         })
-        .filter(Boolean);
+        .filter((item): item is { cat: Category; used: number; budget: Budget } => item !== null);
 
       if (overBudgets.length) {
         const messages = overBudgets.map(
