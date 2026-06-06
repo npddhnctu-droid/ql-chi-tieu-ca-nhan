@@ -101,9 +101,8 @@ interface BudgetWarning {
 // Helper to render icon
 const CategoryIcon = ({ name, className, style }: { name: string; className?: string; style?: React.CSSProperties }) => {
   const pascalName = name.charAt(0).toUpperCase() + name.slice(1);
-  const IconComponent = (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[pascalName] || 
-                        (LucideIcons as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>)[name] || 
-                        LucideIcons.HelpCircle;
+  const icons = LucideIcons as unknown as Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>>;
+  const IconComponent = icons[pascalName] || icons[name] || LucideIcons.HelpCircle as unknown as React.ComponentType<React.SVGProps<SVGSVGElement>>;
   return <IconComponent className={className} style={style} />;
 };
 

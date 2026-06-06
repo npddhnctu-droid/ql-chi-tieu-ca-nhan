@@ -4,9 +4,16 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getBudgets } from "@/app/protected/actions";
 
+interface Budget {
+  id: string;
+  amount: number;
+  month_year: string;
+  used?: number;
+}
+
 export default function BudgetHistoryPage() {
   const router = useRouter();
-  const [budgets, setBudgets] = useState<any[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
 
   // -------------------------------------------------

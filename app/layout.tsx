@@ -1,8 +1,4 @@
 import type { Metadata } from "next";
-<<<<<<< HEAD
-=======
-import { initMonitoring } from "@/src/lib/monitoring";
->>>>>>> bde41d42dbe66e5037615b118626098e78297179
 import { Geist, Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
@@ -27,31 +23,11 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-<<<<<<< HEAD
-if (typeof window !== "undefined" && !(window as any).chrome) {
-  (window as any).chrome = {
-    runtime: {
-      sendMessage: () => {},
-      onMessage: { addListener: () => {} },
-      lastError: null,
-    },
-  };
-=======
-// Initialize monitoring on client side
-if (typeof window !== "undefined") {
-  initMonitoring();
->>>>>>> bde41d42dbe66e5037615b118626098e78297179
-}
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-<<<<<<< HEAD
 }) {
-=======
-}>) {
->>>>>>> bde41d42dbe66e5037615b118626098e78297179
   return (
     <html lang="en" suppressHydrationWarning className={cn("font-sans", inter.variable)}>
       <body className={`${geistSans.className} antialiased`}>
